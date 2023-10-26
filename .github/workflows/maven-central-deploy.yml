@@ -1,11 +1,25 @@
-# When main branch is updated:
-# - Build
-# - Deploy the artifacts to configured Maven repository
-# - Update the dependency graph
-name: Maven Deploy
+# Build with Maven and deploy to Maven Central
+#
+# This is not a release workflow, use it to deploy a SNAPSHOT
+# version of your project.
+#
+# Call this workflow on push to the base branch.
+#
+# Requirements:
+#
+# - OSSRH_USERNAME secret (at the repository or organization level)
+# - OSSRH_TOKEN secret
+
+name: Maven Deploy to Maven Central
 
 on:
   workflow_call:
+    inputs:
+      jdkVersion:
+        type: string
+        description: "Version of the JDK to setup and use"
+        required: false
+        default: "17"
 
 jobs:
   build:
@@ -18,10 +32,10 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Set up JDK 17
+    - name: Set up JDK ${{ inputs.jdkVersion }}
       uses: actions/setup-java@v3
       with:
-        java-version: 17
+        java-version: ${{ inputs.jdkVersion }}
         distribution: temurin
         cache: maven
         server-id: ossrh
@@ -32,7 +46,6 @@ jobs:
     - name: Build and deploy with Maven
       run: mvn -B deploy --file pom.xml -s $GITHUB_WORKSPACE/settings.xml
       env:
-        GITHUB_TOKEN: ${{ github.token }}
         OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
         OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
         
