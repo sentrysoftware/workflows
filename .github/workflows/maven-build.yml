@@ -8,6 +8,11 @@ on:
         description: "Version of the JDK to setup and use"
         required: false
         default: "17"
+      nodeVersion:
+        type: string
+        description: "Version of Node.js to setup and use (if needed)"
+        required: false
+        default: ""
 
 jobs:
   build:
@@ -22,5 +27,10 @@ jobs:
         java-version: ${{ inputs.jdkVersion }}
         distribution: temurin
         cache: maven
+    - name: Setup Node.js ${{ inputs.nodeVersion }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ inputs.nodeVersion }}
+      if: ${{ inputs.nodeVersion != '' }}
     - name: Build with Maven
       run: mvn -B verify --file pom.xml
