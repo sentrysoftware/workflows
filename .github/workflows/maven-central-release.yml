@@ -42,7 +42,12 @@ on:
         description: "Version of the JDK to setup and use"
         required: false
         default: "17"
-
+      nodeVersion:
+        type: string
+        description: "Version of Node.js to setup and use (if needed)"
+        required: false
+        default: ""
+        
 permissions:
   contents: write
   pull-requests: write
@@ -86,6 +91,18 @@ jobs:
         gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
         gpg-passphrase: MAVEN_GPG_PASSPHRASE
 
+    - name: Setup Node.js ${{ inputs.nodeVersion }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ inputs.nodeVersion }}
+      if: ${{ inputs.nodeVersion != '' }}
+
+    - name: Setup GitHub Pages
+      id: pages
+      uses: actions/configure-pages@v3
+      with:
+        enablement: true
+    
     - name: Configure Git User
       run: |
         git config user.email "actions@github.com"
@@ -151,12 +168,6 @@ jobs:
           release:rollback \
       if: always() && (steps.prepare.outcome == 'failure' || steps.release.outcome == 'failure')
 
-    - name: Setup GitHub Pages
-      id: pages
-      uses: actions/configure-pages@v3
-      with:
-        enablement: true
-    
     - name: Upload Maven Site to GitHub Pages
       uses: actions/upload-pages-artifact@v2
       with:
