@@ -20,6 +20,11 @@ on:
         description: "Version of the JDK to setup and use"
         required: false
         default: "17"
+      nodeVersion:
+        type: string
+        description: "Version of Node.js to setup and use (if needed)"
+        required: false
+        default: ""
 
 jobs:
   build:
@@ -42,6 +47,12 @@ jobs:
         server-username: OSSRH_USERNAME
         server-password: OSSRH_TOKEN
         settings-path: ${{ github.workspace }} # location for the settings.xml file
+
+    - name: Setup Node.js ${{ inputs.nodeVersion }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ inputs.nodeVersion }}
+      if: ${{ inputs.nodeVersion != '' }}
 
     - name: Build and deploy with Maven
       run: mvn -B deploy --file pom.xml -s $GITHUB_WORKSPACE/settings.xml
