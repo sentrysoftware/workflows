@@ -95,6 +95,7 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ inputs.nodeVersion }}
+        cache: npm
       if: ${{ inputs.nodeVersion != '' }}
 
     - name: Setup GitHub Pages
