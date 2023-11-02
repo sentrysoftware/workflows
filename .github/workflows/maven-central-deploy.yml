@@ -52,6 +52,7 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ inputs.nodeVersion }}
+        cache: npm
       if: ${{ inputs.nodeVersion != '' }}
 
     - name: Build and deploy with Maven
