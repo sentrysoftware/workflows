@@ -44,6 +44,8 @@ jobs:
     - name: Setup tmate SSH session
       uses: mxschmitt/action-tmate@v3
       if: ${{ inputs.debug }}
+      with:
+        detached: true
 
     - name: Configure Maven debug flag
       run: echo "debugFlag=--debug" >> $GITHUB_ENV
