@@ -50,4 +50,4 @@ jobs:
       if: ${{ inputs.debug }}
       
     - name: Build with Maven
-      run: mvn {{ env.debugFlag }} --batch-mode verify --file pom.xml
+      run: mvn ${{ env.debugFlag }} --batch-mode verify --file pom.xml
