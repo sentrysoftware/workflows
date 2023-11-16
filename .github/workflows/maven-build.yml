@@ -13,25 +13,41 @@ on:
         description: "Version of Node.js to setup and use (if needed)"
         required: false
         default: ""
-
+      debug:
+        type: boolean
+        description: "Enable debug and SSH into the workspace"
+        required: false
+        default: false
 jobs:
   build:
 
     runs-on: ubuntu-latest
 
     steps:
+    
     - uses: actions/checkout@v4
+    
     - name: Set up JDK ${{ inputs.jdkVersion }}
       uses: actions/setup-java@v3
       with:
         java-version: ${{ inputs.jdkVersion }}
         distribution: temurin
         cache: maven
+    
     - name: Setup Node.js ${{ inputs.nodeVersion }}
       uses: actions/setup-node@v3
       with:
         node-version: ${{ inputs.nodeVersion }}
         cache: npm
       if: ${{ inputs.nodeVersion != '' }}
+    
+    - name: Setup tmate SSH session
+      uses: mxschmitt/action-tmate@v3
+      if: ${{ inputs.debug }}
+
+    - name: Configure Maven debug flag
+      run: echo "debugFlag=--debug" >> $GITHUB_ENV
+      if: ${{ inputs.debug }}
+      
     - name: Build with Maven
-      run: mvn -B verify --file pom.xml
+      run: mvn {{ env.debugFlag }} --batch-mode verify --file pom.xml
