@@ -49,13 +49,13 @@ jobs:
     
     - name: Setup tmate SSH session
       uses: mxschmitt/action-tmate@v3
-      if: ${{ inputs.ssh == "true" }}
+      if: ${{ inputs.ssh == 'true' }}
       with:
         detached: true
 
     - name: Configure Maven debug flag
       run: echo "debugFlag=--debug" >> $GITHUB_ENV
-      if: ${{ inputs.debug == "true" }}
+      if: ${{ inputs.debug == 'true' }}
       
     - name: Build with Maven
       run: mvn ${{ env.debugFlag }} --batch-mode verify --file pom.xml
