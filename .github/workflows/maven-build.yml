@@ -14,10 +14,16 @@ on:
         required: false
         default: ""
       debug:
-        type: boolean
-        description: "Enable debug and SSH into the workspace"
+        type: string
+        description: "Enable Maven debug"
         required: false
-        default: false
+        default: "false"
+      ssh:
+        type: string
+        description: "Enable SSH session to the runner"
+        required: false
+        default: "false"
+        
 jobs:
   build:
 
@@ -43,13 +49,13 @@ jobs:
     
     - name: Setup tmate SSH session
       uses: mxschmitt/action-tmate@v3
-      if: ${{ inputs.debug }}
+      if: ${{ inputs.ssh == "true" }}
       with:
         detached: true
 
     - name: Configure Maven debug flag
       run: echo "debugFlag=--debug" >> $GITHUB_ENV
-      if: ${{ inputs.debug }}
+      if: ${{ inputs.debug == "true" }}
       
     - name: Build with Maven
       run: mvn ${{ env.debugFlag }} --batch-mode verify --file pom.xml
