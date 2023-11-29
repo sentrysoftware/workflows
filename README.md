@@ -61,3 +61,64 @@ jobs:
       ssh: ${{ github.event_name == 'workflow_dispatch' && inputs.ssh }}
 ```
 
+## Maven Central Deploy
+
+The `maven-central-deploy.yml` workflow builds a Maven project and *deploys* its artifacts to [Sonatype's OSSRH SNAPSHOT repository](https://s01.oss.sonatype.org/content/repositories/snapshots/). It is designed to be invoked on `push` on the `main` branch of the repository, so the **SNAPSHOT** version built from the `main` branch can be used by other projects as a dependency. Basically, the project is built with the `mvn deploy` command.
+
+> [!IMPORTANT]
+> This workflow is **NOT** designed to deploy release versions of the artifact to Maven Central repositories, as it doesn't fulfill the requirements for Maven Central (signatures, etc.).
+
+The workflow also updates the dependency tree for [dependabot](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuring-dependabot-version-updates).
+
+### Requirements
+
+Sonatype's OSSRH repositories must be [specified in the `<distributionManagement>` section of the project's `pom.xml`](https://maven.apache.org/pom.html#repository), with `<id>ossrh</id>`:
+
+```xml
+	<distributionManagement>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
+```
+
+The below secrets must be declared in the repository or the GitHub organization:
+
+| Secret | Description |
+|---|---|
+| `OSSRH_USERNAME` | Username to connect to [Sonatype's Nexus Repository Manager](https://s01.oss.sonatype.org/) [
+[ `OSSRH_TOKEN` | The corresponding token obtained from Sonatype |
+
+### Inputs
+
+| Input | Description | Default value |
+|---|---|---|
+| `jdkVersion` | Version of the JDK to setup to run Maven. See [supported syntax](https://github.com/actions/setup-java#supported-version-syntax). | `17` |
+| `nodeVersion` | Version of the NodeJS to setup for this project. **Optional** (if not specified, NodeJS won't be installed). See [supported syntax](https://github.com/actions/setup-node#supported-version-syntax). | *None* |
+
+### How to use it?
+
+To use this workflow, you must define a `job` that `uses: sentrysoftware/workflows/.github/workflows/maven-central-deploy.yml@main`. 
+
+> [!IMPORTANT]
+> Instead of `@main`, it is recommended to use an actual version, to avoid breaking your build if the workflow required inputs change in the future, like `@v1`.
+
+To run this workflow automatically on the `main` branch, create a `.github/workflows/deploy.yml` with the below content:
+
+```yaml
+name: Maven Deploy
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    uses: sentrysoftware/workflows/.github/workflows/maven-central-deploy.yml@main
+    with:
+      jdkVersion: "17"
+      nodeVersion: "20.x"
+    secrets: inherit
+```
+
