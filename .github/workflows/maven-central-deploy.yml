@@ -49,7 +49,7 @@ jobs:
         settings-path: ${{ github.workspace }} # location for the settings.xml file
 
     - name: Setup Node.js ${{ inputs.nodeVersion }}
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: ${{ inputs.nodeVersion }}
         cache: npm
