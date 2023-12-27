@@ -3,6 +3,11 @@ name: Maven Build (mvn verify)
 on:
   workflow_call:
     inputs:
+      mavenGoal:
+        type: string
+        description: "Maven goal(s) to execute"
+        required: false
+        default: "clean verify site"
       jdkVersion:
         type: string
         description: "Version of the JDK to setup and use"
@@ -58,4 +63,4 @@ jobs:
       if: ${{ inputs.debug == 'true' }}
       
     - name: Build with Maven
-      run: mvn ${{ env.debugFlag }} --batch-mode verify --file pom.xml
+      run: mvn ${{ env.debugFlag }} --batch-mode ${{ inputs.mavenGoal }} --file pom.xml
