@@ -4,6 +4,12 @@ name: Build and Deploy Maven Site to GitHub Pages
 
 on:
   workflow_call:
+    inputs:
+        jdkVersion:
+        type: string
+        description: "Version of the JDK to setup and use"
+        required: false
+        default: "17"
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
@@ -29,17 +35,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - name: Set up JDK 17
+    
+    - name: Set up JDK ${{ inputs.jdkVersion }}
       uses: actions/setup-java@v4
       with:
-        java-version: '17'
-        distribution: 'temurin'
+        java-version: ${{ inputs.jdkVersion }}
+        distribution: temurin
         cache: maven
+    
     - name: Build site with Maven
-      run: mvn -B site --file pom.xml
+      run: mvn --batch-mode --file pom.xml clean site
+    
     - name: Setup Pages
       id: pages
       uses: actions/configure-pages@v4
+    
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
       with:
