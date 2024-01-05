@@ -6,10 +6,10 @@ on:
   workflow_call:
     inputs:
       jdkVersion:
-      type: string
-      description: "Version of the JDK to setup and use"
-      required: false
-      default: "17"
+        type: string
+        description: "Version of the JDK to setup and use"
+        required: false
+        default: "17"
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
