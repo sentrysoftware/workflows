@@ -44,7 +44,12 @@ jobs:
         java-version: ${{ inputs.jdkVersion }}
         distribution: temurin
         cache: maven
-    
+
+    - name: Set up Maven settings.xml
+      uses: s4u/maven-settings-action@v3.0.0
+      with:
+        sonatypeSnapshots: true
+
     - name: Setup Node.js ${{ inputs.nodeVersion }}
       uses: actions/setup-node@v4
       with:
