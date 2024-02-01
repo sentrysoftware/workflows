@@ -7,7 +7,7 @@ on:
         type: string
         description: "Maven phases to execute"
         required: false
-        default: "verify site"
+        default: "deploy site"
       jdkVersion:
         type: string
         description: "Version of the JDK to setup and use"
@@ -49,6 +49,8 @@ jobs:
       uses: s4u/maven-settings-action@v3.0.0
       with:
         sonatypeSnapshots: true
+        servers: '[{"id": "github","configuration": {"httpHeaders": {"property": {"name": "Authorization","value": "Bearer ${{ secrets.GITHUB_TOKEN }}"}}}}]'
+        properties: '[{"altDeploymentRepository": "github::default::https://maven.pkg.github.com/${{ github.repository }}"}, {"altReleaseDeploymentRepository": "github::default::https://maven.pkg.github.com/${{ github.repository }}"}]'
 
     - name: Setup Node.js ${{ inputs.nodeVersion }}
       uses: actions/setup-node@v4
