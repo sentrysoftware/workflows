@@ -68,6 +68,11 @@ jobs:
   build:
     # Call this shared workflow (use `@v1` to use a specific version, instead of the latest)
     uses: sentrysoftware/workflows/.github/workflows/maven-build.yml@main
+    permissions:
+      packages: write
+      checks: write
+      contents: write
+      pull-requests: write
     with:
       jdkVersion: "17"
       nodeVersion: "20.x"
