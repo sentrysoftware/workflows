@@ -66,17 +66,17 @@ on:
         description: Open SSH session in the runner
         required: false
         default: false
-	  uploadCheckstyleReport:
+      uploadCheckstyleReport:
         type: boolean
         description: Upload Checkstyle report created by Maven
         required: false
         default: true
-	  uploadPMDReport:
+      uploadPMDReport:
         type: boolean
         description: Upload PMD report created by Maven
         required: false
         default: true
-	  uploadSpotbugsReport:
+      uploadSpotbugsReport:
         type: boolean
         description: Upload Spotbugs report created by Maven
         required: false
@@ -91,9 +91,9 @@ jobs:
       nodeVersion: "20.x"
       debug: ${{ github.event_name == 'workflow_dispatch' && inputs.debug }}
       ssh: ${{ github.event_name == 'workflow_dispatch' && inputs.ssh }}
-	  uploadCheckstyleReport: ${{ inputs.uploadCheckstyleReport }}
-	  uploadPMDReport: ${{ inputs.uploadPMDReport }}
-	  uploadSpotbugsReport: ${{ inputs.uploadSpotbugsReport }}
+      uploadCheckstyleReport: ${{ inputs.uploadCheckstyleReport }}
+      uploadPMDReport: ${{ inputs.uploadPMDReport }}
+      uploadSpotbugsReport: ${{ inputs.uploadSpotbugsReport }}
 ```
 
 ### Troubleshooting the build
