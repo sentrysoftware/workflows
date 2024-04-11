@@ -28,6 +28,18 @@ on:
         description: "Enable SSH session to the runner"
         required: false
         default: "false"
+      uploadCheckstyleReport:
+        type: string
+        description: "Enable the upload of any Checkstyle report created by Maven"
+        default: "true"
+      uploadPMDReport:
+        type: string
+        description: "Enable the upload of any PMD report created by Maven"
+        default: "true"
+      uploadSpotbugsReport:
+        type: string
+        description: "Enable the upload of any Spotbugs report created by Maven"
+        default: "true"
 
 permissions:
   # This is required for report upload
@@ -78,15 +90,18 @@ jobs:
 
     - name: Upload Checkstyle reports to GitHub
       uses: jwgmeligmeyling/checkstyle-github-action@v1.2
+      if: ${{ inputs.uploadCheckstyleReport == 'true' }}
       with:
         path: "**/checkstyle-result.xml"
 
     - name: Upload Spotbugs reports to GitHub
       uses: jwgmeligmeyling/spotbugs-github-action@v1.2
+      if: ${{ inputs.uploadSpotbugsReport == 'true' }}
       with:
         path: "**/spotbugsXml.xml"
 
     - name: Upload PMD reports to GitHub
       uses: jwgmeligmeyling/pmd-github-action@v1.2
+      if: ${{ inputs.uploadPMDReport == 'true' }}
       with:
         path: "**/pmd.xml"

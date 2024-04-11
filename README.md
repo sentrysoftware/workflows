@@ -22,7 +22,7 @@ This repository provides common workflows to be [used as GitHub Actions](https:/
 
 ## Maven Build
 
-The `maven-build.yml` workflow simply builds a Maven project with the `mvn verify` goal. It's designed to be invoked on `push` on PRs, so that this action is considered as a *Check* on the PR, i.e. it will prevent the build from being merged if the build fails.
+The `maven-build.yml` workflow simply builds a Maven project with the `mvn verify site` phases. It's designed to be invoked on `push` on PRs, so that this action is considered as a *Check* on the PR, i.e. it will prevent the build from being merged if the build fails. Produced reports such as checkstyle, PMD and spotbugs will then be added as comments on pull-request.
 
 ### Inputs
 
@@ -32,6 +32,9 @@ The `maven-build.yml` workflow simply builds a Maven project with the `mvn verif
 | `nodeVersion` | Version of the NodeJS to setup for this project. **Optional** (if not specified, NodeJS won't be installed). See [supported syntax](https://github.com/actions/setup-node#supported-version-syntax). | *None* |
 | `debug` | Whether to run Maven in debug mode (with `-X` option) | `"false" |
 | `ssh` | Whether to open a SSH session in the GitHub Actions runner, to let you interact with the system that performed the build. **SSH session automatically closes after 10 minutes of inactivity.** | `"false"` |
+| `uploadCheckstyleReport` | Whether to upload any Checkstyle report created by Maven | `"true"` |
+| `uploadPMDReport` | Whether to upload any PMD report created by Maven | `"true"` |
+| `uploadSpotbugsReport` | Whether to upload any Spotbugs report created by Maven | `"true"` |
 
 ### How to use it?
 
@@ -63,21 +66,34 @@ on:
         description: Open SSH session in the runner
         required: false
         default: false
+	  uploadCheckstyleReport:
+        type: boolean
+        description: Upload Checkstyle report created by Maven
+        required: false
+        default: true
+	  uploadPMDReport:
+        type: boolean
+        description: Upload PMD report created by Maven
+        required: false
+        default: true
+	  uploadSpotbugsReport:
+        type: boolean
+        description: Upload Spotbugs report created by Maven
+        required: false
+        default: true
 
 jobs:
   build:
     # Call this shared workflow (use `@v1` to use a specific version, instead of the latest)
     uses: sentrysoftware/workflows/.github/workflows/maven-build.yml@main
-    permissions:
-      packages: write
-      checks: write
-      contents: write
-      pull-requests: write
     with:
       jdkVersion: "17"
       nodeVersion: "20.x"
       debug: ${{ github.event_name == 'workflow_dispatch' && inputs.debug }}
       ssh: ${{ github.event_name == 'workflow_dispatch' && inputs.ssh }}
+	  uploadCheckstyleReport: ${{ inputs.uploadCheckstyleReport }}
+	  uploadPMDReport: ${{ inputs.uploadPMDReport }}
+	  uploadSpotbugsReport: ${{ inputs.uploadSpotbugsReport }}
 ```
 
 ### Troubleshooting the build
