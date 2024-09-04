@@ -89,7 +89,7 @@ jobs:
       run: mvn ${{ env.debugFlag }} --batch-mode  --file pom.xml clean ${{ inputs.mavenPhases }}
 
     - name: Attach Maven artifacts to the build
-      uses: sentrysoftware/upload-buildinfo-outputs@v1
+      uses: sentrysoftware/upload-buildinfo-outputs@v2
 
     - name: Upload Checkstyle reports to GitHub
       uses: jwgmeligmeyling/checkstyle-github-action@v1.2
