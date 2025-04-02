@@ -45,7 +45,7 @@ jobs:
         cache: maven
 
     - name: Set up Maven settings.xml
-      uses: s4u/maven-settings-action@v3.0.0
+      uses: s4u/maven-settings-action@v3.1.0
       with:
         servers: '[{"id": "ossrh", "username": "${env.OSSRH_USERNAME}", "password": "${env.OSSRH_TOKEN}"}]'
         sonatypeSnapshots: true
