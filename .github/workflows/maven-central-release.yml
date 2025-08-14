@@ -85,9 +85,9 @@ jobs:
         distribution: temurin
         java-package: jdk
         cache: maven
-        server-id: ossrh
-        server-username: OSSRH_USERNAME
-        server-password: OSSRH_TOKEN
+        server-id: central
+        server-username: MAVEN_CENTRAL_USERNAME
+        server-password: MAVEN_CENTRAL_TOKEN
         gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
         gpg-passphrase: MAVEN_GPG_PASSPHRASE
 
@@ -141,8 +141,8 @@ jobs:
           -Dresume=false
       env:
         MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
-        OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-        OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
+        MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+        MAVEN_CENTRAL_TOKEN: ${{ secrets.MAVEN_CENTRAL_TOKEN }}
 
     - name: Perform release to Maven Central
       id: release
@@ -159,8 +159,8 @@ jobs:
       env:
         AUTO_RELEASE_AFTER_CLOSE: ${{ inputs.autoRelease }}
         MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
-        OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-        OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
+        MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+        MAVEN_CENTRAL_TOKEN: ${{ secrets.MAVEN_CENTRAL_TOKEN }}
 
     - name: Release rollback on failure
       run: |
@@ -198,8 +198,8 @@ jobs:
         cat target/*.buildinfo >> $GITHUB_STEP_SUMMARY
         echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
       env:
-        OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-        OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
+        MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+        MAVEN_CENTRAL_TOKEN: ${{ secrets.MAVEN_CENTRAL_TOKEN }}
 
     - name: Create Pull Request from ${{ needs.release.outputs.branchName }} to ${{ github.event.repository.default_branch }}
       uses: devops-infra/action-pull-request@v0.6.0

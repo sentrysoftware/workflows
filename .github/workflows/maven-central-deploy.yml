@@ -47,7 +47,7 @@ jobs:
     - name: Set up Maven settings.xml
       uses: s4u/maven-settings-action@v3.1.0
       with:
-        servers: '[{"id": "ossrh", "username": "${env.OSSRH_USERNAME}", "password": "${env.OSSRH_TOKEN}"}]'
+        servers: '[{"id": "central", "username": "${env.MAVEN_CENTRAL_USERNAME}", "password": "${env.MAVEN_CENTRAL_TOKEN}"}]'
         sonatypeSnapshots: true
 
     - name: Setup Node.js ${{ inputs.nodeVersion }}
@@ -60,8 +60,8 @@ jobs:
     - name: Build and deploy with Maven
       run: mvn -B deploy --file pom.xml
       env:
-        OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-        OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
+        MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+        MAVEN_CENTRAL_TOKEN: ${{ secrets.MAVEN_CENTRAL_TOKEN }}
         
     # Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
     - name: Update dependency graph
