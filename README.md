@@ -114,7 +114,7 @@ The SSH daemon prevents the build from completing, and wait for the user to open
 
 ## Maven Central Deploy
 
-The `maven-central-deploy.yml` workflow builds a Maven project and *deploys* its artifacts to [Sonatype's OSSRH SNAPSHOT repository](https://s01.oss.sonatype.org/content/repositories/snapshots/). It is designed to be invoked on `push` on the `main` branch of the repository, so the **SNAPSHOT** version built from the `main` branch can be used by other projects as a dependency. Basically, the project is built with the `mvn deploy` command.
+The `maven-central-deploy.yml` workflow builds a Maven project and *deploys* its artifacts to [Maven Central SNAPSHOT repository](https://central.sonatype.com/). It is designed to be invoked on `push` on the `main` branch of the repository, so the **SNAPSHOT** version built from the `main` branch can be used by other projects as a dependency. Basically, the project is built with the `mvn deploy` command.
 
 > [!IMPORTANT]
 > This workflow is **NOT** designed to deploy release versions of the artifact to Maven Central repositories, as it doesn't fulfill the requirements for Maven Central (signatures, etc.).
@@ -123,13 +123,13 @@ The workflow also updates the dependency tree for [dependabot](https://docs.gith
 
 ### Requirements
 
-Sonatype's OSSRH repositories must be [specified in the `<distributionManagement>` section of the project's `pom.xml`](https://maven.apache.org/pom.html#repository), with `<id>ossrh</id>`:
+The Maven Central SNAPSHOT repository must be [specified in the `<distributionManagement>` section of the project's `pom.xml`](https://maven.apache.org/pom.html#repository), with `<id>central</id>`:
 
 ```xml
  <distributionManagement>
   <snapshotRepository>
-   <id>ossrh</id>
-   <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+   <id>central</id>
+   <url>https://central.sonatype.com/repository/maven-snapshots/</url>
   </snapshotRepository>
  </distributionManagement>
 ```
@@ -138,8 +138,8 @@ The below secrets must be declared in the repository or the GitHub organization:
 
 | Secret | Description |
 |---|---|
-| `OSSRH_USERNAME` | Username to connect to [Sonatype's Nexus Repository Manager](https://s01.oss.sonatype.org) |
-| `OSSRH_TOKEN` | The corresponding token obtained from Sonatype |
+| `MAVEN_CENTRAL_USERNAME` | [Maven Central User Token](https://central.sonatype.org/publish/generate-portal-token/) name |
+| `MAVEN_CENTRAL_TOKEN` | Corresponding User Token |
 
 ### Inputs
 
@@ -175,7 +175,7 @@ jobs:
 
 ## Maven Central Release
 
-The `maven-central-release.yml` workflow performs all the necessary actions to release a Maven project to [Sonatype's OSSRH release repository](https://s01.oss.sonatype.org/content/groups/public/), which is available in Maven Central.
+The `maven-central-release.yml` workflow performs all the necessary actions to release a Maven project to [Maven Central](https://central.sonatype.com/), hosted by Sonatype.
 
 This workflow **must** be triggered manually and run from the `main` branch of the project, and will perform the below actions:
 
@@ -191,10 +191,10 @@ This workflow **must** be triggered manually and run from the `main` branch of t
 * [Perform the actual release with `maven-release-plugin:perform`](https://maven.apache.org/maven-release/maven-release-plugin/usage/perform-release.html)
     * Checkout the `vX.Y.Z` in a temporary folder (`target/release`)
     * Build the project with `mvn deploy`
-    * Note: The `deploy` phase is enhanced with [Nexus Staging Maven Plugin](https://github.com/sonatype/nexus-maven-plugins/tree/main/staging/maven-plugin)
+    * Note: The `deploy` phase is "enhanced" with the [central-publishing-maven-plugin](https://central.sonatype.org/publish/publish-portal-maven/) Maven plugin
     * Sign the artifacts with GPG
-    * Deploy artifacts to a new staging repository on [Sonatype's Nexus Repository Manager](https://s01.oss.sonatype.org)
-    * Release the repository immediately if `autoRelease` input is `true`
+    * Deploy artifacts in Maven Central repository (the artifacts are not publicly available, at this stage, until the artifacts are manually published)
+    * Publish the artifacts immediately only if `autoRelease` input is `true`
 * Update the site (`target/site/*`) to GitHub Pages
 * Create a GitHub Release with the produced artifacts
 * Create a Pull Request from the `release/vX.Y.Z` branch to `main`
@@ -206,88 +206,70 @@ The below secrets must be declared in the GitHub repository or the GitHub organi
 
 | Secret | Description |
 |---|---|
-| `OSSRH_USERNAME` | Username to connect to [Sonatype's Nexus Repository Manager](https://s01.oss.sonatype.org) |
-| `OSSRH_TOKEN` | The corresponding token obtained from Sonatype |
+| `MAVEN_CENTRAL_USERNAME` | [Maven Central User Token](https://central.sonatype.org/publish/generate-portal-token/) name |
+| `MAVEN_CENTRAL_TOKEN` | Corresponding User Token |
 | `MAVEN_GPG_PRIVATE_KEY` | The GPG private key to [sign the artifacts](https://central.sonatype.org/publish/requirements/gpg/) |
 | `MAVEN_GPG_PASSPHRASE` | The associated passphrase |
-
-Sonatype's OSSRH repositories must be [specified in the `<distributionManagement>` section of the project's `pom.xml`](https://maven.apache.org/pom.html#repository), with `<id>ossrh</id>`:
-
-```xml
- <distributionManagement>
-  <repository>
-   <id>ossrh</id>
-   <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-  </repository>
- </distributionManagement>
-```
 
 Additionally, the `pom.xml` must declare a `release` [profile](https://maven.apache.org/guides/introduction/introduction-to-profiles.html), to declare a few custom phases for the release, as below:
 
 ```xml
-  <profiles>
+		<profile>
+			<id>release</id>
+			<build>
+				<plugins>
 
-  <!-- Profile for releasing the project -->
-  <profile>
-   <id>release</id>
-   <build>
-    <plugins>
+					<!-- gpg to sign the released artifacts -->
+					<plugin>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+								<configuration>
+									<updateReleaseInfo>true</updateReleaseInfo>
+									<gpgArguments>
+										<arg>--pinentry-mode</arg>
+										<arg>loopback</arg>
+									</gpgArguments>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
 
-     <!-- gpg to sign the released artifacts -->
-     <plugin>
-      <artifactId>maven-gpg-plugin</artifactId>
-      <version>3.1.0</version>
-      <executions>
-       <execution>
-        <id>sign-artifacts</id>
-        <phase>verify</phase>
-        <goals>
-         <goal>sign</goal>
-        </goals>
-        <configuration>
-         <updateReleaseInfo>true</updateReleaseInfo>
-         <gpgArguments>
-          <arg>--pinentry-mode</arg>
-          <arg>loopback</arg>
-         </gpgArguments>
-        </configuration>
-       </execution>
-      </executions>
-     </plugin>
+					<!-- nexus-staging (Sonatype) -->
+					<plugin>
+						<groupId>org.sonatype.central</groupId>
+						<artifactId>central-publishing-maven-plugin</artifactId>
+						<extensions>true</extensions>
+						<configuration>
+							<publishingServerId>central</publishingServerId>
+							<autoPublish>${env.AUTO_RELEASE_AFTER_CLOSE}</autoPublish>
+							<waitUntil>published</waitUntil>
+						</configuration>
+					</plugin>
 
-     <!-- nexus-staging (Sonatype) -->
-     <plugin>
-      <groupId>org.sonatype.plugins</groupId>
-      <artifactId>nexus-staging-maven-plugin</artifactId>
-      <version>1.6.13</version>
-      <extensions>true</extensions>
-      <configuration>
-       <serverId>ossrh</serverId>
-       <nexusUrl>https://s01.oss.sonatype.org</nexusUrl>
-       <autoReleaseAfterClose>${env.AUTO_RELEASE_AFTER_CLOSE}</autoReleaseAfterClose>
-      </configuration>
-     </plugin>
-
-     <!-- release -->
-     <plugin>
-      <groupId>org.apache.maven.plugins</groupId>
-      <artifactId>maven-release-plugin</artifactId>
-      <version>3.0.1</version>
-      <configuration>
-       <tagNameFormat>v@{project.version}</tagNameFormat>
-      </configuration>
-      <executions>
-       <execution>
-        <id>default</id>
-        <goals>
-         <goal>perform</goal>
-        </goals>
-       </execution>
-      </executions>
-     </plugin>
-    </plugins>
-   </build>
-  </profile>
+					<!-- release -->
+					<plugin>
+						<artifactId>maven-release-plugin</artifactId>
+						<configuration>
+							<tagNameFormat>v@{project.version}</tagNameFormat>
+						</configuration>
+						<executions>
+							<execution>
+								<id>default</id>
+								<goals>
+									<goal>perform</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 ```
 
 ### Inputs
@@ -296,7 +278,7 @@ Additionally, the `pom.xml` must declare a `release` [profile](https://maven.apa
 |---|---|---|
 | `releaseVersion` | Version to release (will be set in `pom.xml` for this release) | *None* |
 | `developmentVersion` |  Version of the new *SNAPSHOT* version (will be set in `pom.xml` **after** the release) | *None* |
-| `autoRelease` | Whether to release the staging repository on Sonatype Nexus immediately | `false` |
+| `autoRelease` | Whether to make the deployed artifacts publicly available on Maven Central immediately | `false` |
 | `jdkVersion` | Version of the JDK to setup to run Maven. See [supported syntax](https://github.com/actions/setup-java#supported-version-syntax). | `17` |
 | `nodeVersion` | Version of the NodeJS to setup for this project. **Optional** (if not specified, NodeJS won't be installed). See [supported syntax](https://github.com/actions/setup-node#supported-version-syntax). | *None* |
 
@@ -346,7 +328,7 @@ The workflow performs several builds (so it may take some time to complete).
 
 If the workflow completes successfully, you will need to perform 2 additional tasks:
 
-1. Login to [Sonatype's Nexus Repository Manager](https://s01.oss.sonatype.org), and **Release** the *staging repository* that has been created by the workflow (the exact name of the repository is listed in the workflow summary). This operation has already been performed if the workflow was called with `autoRelease: true`.
+1. Login to [Maven Central](https://central.sonatype.com/), and **Publish** the artifacts bundle that has been deployed by the workflow. This operation has already been performed if the workflow was called with `autoRelease: true`.
 2. Approve and merge the Pull Request that has been created by the workflow (for the `release/vX.Y.Z` branch)
 
 ### Troubleshooting
@@ -357,7 +339,7 @@ If the workflow fails during the *Prepare Release* step, check the output of `ma
 
 #### Failure during *Perform Release*
 
-If the workflow fails while trying to *close* the staging repository on Sonatype's OSSRH Maven repository, it probably means the artifacts don't comply with the [validation rules for Maven Central](https://central.sonatype.org/publish/requirements/).
+If the workflow fails while trying to *close* the repository on Sonatype's Maven Central repository, it probably means the artifacts don't comply with the [validation rules for Maven Central](https://central.sonatype.org/publish/requirements/).
 
 #### Failures with GitHub Pages
 
