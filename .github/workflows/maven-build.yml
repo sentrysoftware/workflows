@@ -54,7 +54,7 @@ jobs:
 
     steps:
     
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     
     - name: Set up JDK ${{ inputs.jdkVersion }}
       uses: actions/setup-java@v5
@@ -67,7 +67,16 @@ jobs:
       uses: s4u/maven-settings-action@v3.1.0
       with:
         sonatypeSnapshots: true
-
+        repositories: >-
+          [
+            {
+              "id": "central-snapshots",
+              "name": "Maven Repository Switchboard",
+              "url": "https://central.sonatype.com/repository/maven-snapshots",
+              "snapshots": { "enabled": true },
+              "releases": { "enabled": false }
+            }
+          ]
     - name: Setup Node.js ${{ inputs.nodeVersion }}
       uses: actions/setup-node@v4
       with:
