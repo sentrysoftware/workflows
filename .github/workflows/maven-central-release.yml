@@ -171,6 +171,7 @@ jobs:
       uses: actions/upload-pages-artifact@v5
       with:
         path: ./target/release/target/site
+        include-hidden-files: true
 
     - name: Create a GitHub Release
       uses: softprops/action-gh-release@v3
