@@ -175,6 +175,8 @@ jobs:
 
 ## Maven Central Release
 
+The release and GitHub Pages deployment jobs run on Ubuntu 24.04 with Node.js 24 actions. The optional `nodeVersion` input selects the Node.js version used to build your project independently of the actions' runtime.
+
 The `maven-central-release.yml` workflow performs all the necessary actions to release a Maven project to [Maven Central](https://central.sonatype.com/), hosted by Sonatype.
 
 This workflow **must** be triggered manually and run from the `main` branch of the project, and will perform the below actions:
