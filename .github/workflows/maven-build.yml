@@ -54,17 +54,17 @@ jobs:
 
     steps:
     
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v7
     
     - name: Set up JDK ${{ inputs.jdkVersion }}
-      uses: actions/setup-java@v5
+      uses: actions/setup-java@v6
       with:
         java-version: ${{ inputs.jdkVersion }}
         distribution: temurin
         cache: maven
 
     - name: Set up Maven settings.xml
-      uses: s4u/maven-settings-action@v3.1.0
+      uses: s4u/maven-settings-action@v4.0.0
       with:
         sonatypeSnapshots: true
         repositories: >-
@@ -78,7 +78,7 @@ jobs:
             }
           ]
     - name: Setup Node.js ${{ inputs.nodeVersion }}
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v6
       with:
         node-version: ${{ inputs.nodeVersion }}
         cache: npm
@@ -98,7 +98,7 @@ jobs:
       run: mvn ${{ env.debugFlag }} --batch-mode  --file pom.xml clean ${{ inputs.mavenPhases }}
 
     - name: Attach Maven artifacts to the build
-      uses: sentrysoftware/upload-buildinfo-outputs@v2
+      uses: sentrysoftware/upload-buildinfo-outputs@v3
 
     - name: Upload Checkstyle reports to GitHub
       uses: jwgmeligmeyling/checkstyle-github-action@v1.2
