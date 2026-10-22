@@ -64,7 +64,7 @@ jobs:
         cache: maven
 
     - name: Set up Maven settings.xml
-      uses: s4u/maven-settings-action@v4.0.0
+      uses: s4u/maven-settings-action@v4.1.0
       with:
         sonatypeSnapshots: true
         repositories: >-
@@ -78,7 +78,7 @@ jobs:
             }
           ]
     - name: Setup Node.js ${{ inputs.nodeVersion }}
-      uses: actions/setup-node@v6
+      uses: actions/setup-node@v7
       with:
         node-version: ${{ inputs.nodeVersion }}
         cache: npm
